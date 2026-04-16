@@ -7,6 +7,7 @@ import { SymbolView } from "expo-symbols";
 import * as React from "react";
 import {
   FlatList,
+  Pressable,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -17,22 +18,24 @@ interface MainRowActionsProps {
   handleTakePicture: () => void;
   cameraMode: CameraMode;
   isRecording: boolean;
+  setPicture: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export default function MainRowActions({
   cameraMode,
   handleTakePicture,
   isRecording,
+  setPicture,
 }: MainRowActionsProps) {
   const [assets, setAssets] = React.useState<Asset[]>([]);
 
   async function getAlbums() {
     const fetchedAlbums = await getAlbumsAsync();
     const albumAssets = await getAssetsAsync({
-      album: fetchedAlbums[0],
+      // album: fetchedAlbums[2],
       mediaType: "photo",
       sortBy: "creationTime",
-      first: 10,
+      first: 100,
     });
 
     setAssets(albumAssets.assets);
@@ -51,11 +54,13 @@ export default function MainRowActions({
         data={assets}
         inverted
         renderItem={({ item }) => (
-          <Image
-            key={item.id}
-            source={{ uri: item.uri }}
-            style={{ width: 40, height: 40, borderRadius: 5 }}
-          />
+          <Pressable onPress={() => setPicture(item.uri)}>
+            <Image
+              key={item.id}
+              source={{ uri: item.uri }}
+              style={{ width: 40, height: 40, borderRadius: 5 }}
+            />
+          </Pressable>
         )}
         horizontal
       />
