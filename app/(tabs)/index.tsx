@@ -5,6 +5,7 @@ import CameraTools from "@/components/CameraTools";
 import MainRowActions from "@/components/MainRowActions";
 import PictureView from "@/components/PictureView";
 import QRCodeButton from "@/components/QRCodeButton";
+import VideoViewComponent from "@/components/VideoView";
 import {
   BarcodeScanningResult,
   CameraMode,
@@ -23,6 +24,7 @@ export default function HomeScreen() {
   const [cameraMode, setCameraMode] = React.useState<CameraMode>("picture");
   const [qrCodeDetected, setQrCodeDetected] = React.useState<string>("");
   const [isBrowsing, setIsBrowsing] = React.useState<boolean>(false);
+  const [isRecording, setIsRecording] = React.useState<boolean>(false);
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const [cameraZoom, setCameraZoom] = React.useState<number>(0);
@@ -48,7 +50,17 @@ export default function HomeScreen() {
     console.log(response);
   }
 
-  async function handleTakeVideo() {}
+  async function toggleRecord() {
+    if (isRecording) {
+      cameraRef.current?.stopRecording();
+      setSaveButton(true);
+      setIsRecording(false);
+    } else {
+      setIsRecording(true);
+      const response = await cameraRef.current?.recordAsync();
+      setVideo(response!.uri);
+    }
+  }
 
   async function handleOpenQRCode() {
     setIsBrowsing(true);
@@ -81,6 +93,15 @@ export default function HomeScreen() {
       <PictureView
         picture={picture}
         setPicture={setPicture}
+        saveButton={saveButton}
+        setSaveButton={setSaveButton}
+      />
+    );
+  if (video)
+    return (
+      <VideoViewComponent
+        video={video}
+        setVideo={setVideo}
         saveButton={saveButton}
         setSaveButton={setSaveButton}
       />
@@ -133,9 +154,12 @@ export default function HomeScreen() {
         />
         <MainRowActions
           cameraMode={cameraMode}
-          handleTakePicture={handleTakePicture}
-          isRecording={false}
+          handleToggle={
+            cameraMode === "picture" ? handleTakePicture : toggleRecord
+          }
+          isRecording={isRecording}
           setPicture={setPicture}
+          setVideo={setVideo}
         />
         <BottomRowTools cameraMode={cameraMode} setCameraMode={setCameraMode} />
       </CameraView>

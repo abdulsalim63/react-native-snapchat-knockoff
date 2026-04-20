@@ -29,6 +29,14 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
+          name="media-library"
+          options={{
+            presentation: "modal",
+            animation: "fade",
+            title: "Media Library",
+          }}
+        />
+        <Stack.Screen
           name="modal"
           options={{ presentation: "modal", title: "Modal" }}
         />

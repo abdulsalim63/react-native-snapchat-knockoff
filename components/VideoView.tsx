@@ -20,11 +20,18 @@ export default function VideoViewComponent({
   setSaveButton,
 }: VideoViewComponentProps) {
   const videoViewRef = React.useRef<VideoView>(null);
+  const [isPlaying, setIsPlaying] = React.useState<boolean>(true);
   const player = useVideoPlayer(video, (player) => {
-    player.loop = true;
+    // player.loop = true;
     player.play();
   });
 
+  React.useEffect(() => {
+    const subscription = player.addListener("playingChange", (isPlaying) => {
+      setIsPlaying(isPlaying.isPlaying);
+    });
+    return () => subscription.remove();
+  }, [player]);
   return (
     <SafeAreaView
       style={{ flex: 1, paddingTop: Platform.OS === "android" ? 10 : 0 }}
@@ -59,6 +66,18 @@ export default function VideoViewComponent({
             }}
           />
         )}
+        <IconButton
+          onPress={() => {
+            if (isPlaying) {
+              player.pause();
+            } else {
+              player.play();
+            }
+            setIsPlaying(!isPlaying);
+          }}
+          iosName={isPlaying ? "pause" : "play"}
+          androidName={isPlaying ? "pause" : "play"}
+        />
         <IconButton
           iosName="square.and.arrow.up"
           androidName="share-outline"

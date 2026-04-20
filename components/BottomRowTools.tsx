@@ -15,7 +15,7 @@ export default function BottomRowTools({
 }: BottomRowToolsProps) {
   return (
     <View style={[styles.bottomContainer, styles.directionRowItemsCenter]}>
-      <Link href={"/"} asChild>
+      <Link href={"/media-library"} asChild>
         <IconButton
           iosName="photo.stack"
           androidName="image"

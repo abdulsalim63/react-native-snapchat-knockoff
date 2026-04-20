@@ -1,4 +1,3 @@
-import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraMode } from "expo-camera";
 import { Image } from "expo-image";
@@ -15,25 +14,27 @@ import {
 } from "react-native";
 
 interface MainRowActionsProps {
-  handleTakePicture: () => void;
+  handleToggle: () => void;
   cameraMode: CameraMode;
   isRecording: boolean;
   setPicture: React.Dispatch<React.SetStateAction<string>>;
+  setVideo: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export default function MainRowActions({
   cameraMode,
-  handleTakePicture,
+  handleToggle,
   isRecording,
   setPicture,
+  setVideo,
 }: MainRowActionsProps) {
   const [assets, setAssets] = React.useState<Asset[]>([]);
 
   async function getAlbums() {
     const fetchedAlbums = await getAlbumsAsync();
     const albumAssets = await getAssetsAsync({
-      // album: fetchedAlbums[2],
-      mediaType: "photo",
+      // album: fetchedAlbums[0],
+      mediaType: ["photo", "video"],
       sortBy: "creationTime",
       first: 100,
     });
@@ -43,7 +44,7 @@ export default function MainRowActions({
 
   React.useEffect(() => {
     getAlbums();
-  }, []);
+  }, [isRecording]);
 
   return (
     <View style={styles.container}>
@@ -54,7 +55,13 @@ export default function MainRowActions({
         data={assets}
         inverted
         renderItem={({ item }) => (
-          <Pressable onPress={() => setPicture(item.uri)}>
+          <Pressable
+            onPress={() =>
+              item.mediaType === "photo"
+                ? setPicture(item.uri)
+                : setVideo(item.uri)
+            }
+          >
             <Image
               key={item.id}
               source={{ uri: item.uri }}
@@ -64,7 +71,7 @@ export default function MainRowActions({
         )}
         horizontal
       />
-      <TouchableOpacity onPress={handleTakePicture}>
+      <TouchableOpacity onPress={handleToggle}>
         <SymbolView
           name={
             cameraMode === "picture"
@@ -75,7 +82,7 @@ export default function MainRowActions({
           }
           size={90}
           type="hierarchical"
-          tintColor={isRecording ? Colors.light.snapPrimary : "white"}
+          tintColor={isRecording ? "red" : "white"}
           animationSpec={{
             effect: {
               type: isRecording ? "pulse" : "bounce",
@@ -87,10 +94,12 @@ export default function MainRowActions({
               name={
                 cameraMode === "picture"
                   ? "ellipse-outline"
-                  : "radio-button-on-outline"
+                  : isRecording
+                    ? "stop-circle-outline"
+                    : "radio-button-on-outline"
               }
               size={90}
-              color={isRecording ? Colors.light.snapPrimary : "white"}
+              color={isRecording ? "red" : "white"}
             />
           }
         />
